@@ -12,13 +12,13 @@ st.title("🌈 Rainbow Flower Animation")
 # --- ओरिजिनल पैरामीटर्स ---
 N, L, W, R = 18, 290, 70, 22
 
-def bez(p0, p1, p2, n=30):
+def bez(x0, y0, x1, y1, x2, y2, n=30):
     pts = []
-    # यहाँ टुपल (Tuple) को पूरी तरह खोलकर [0] और [1] इंडेक्स से X और Y अलग किया गया है
+    # यहाँ X और Y के गणित को पूरी तरह अलग-अलग वेरिएबल्स से फिक्स किया गया है
     for i in range(n + 1):
         t = i / n
-        x = (1 - t)**2 * p0[0] + 2 * (1 - t) * t * p1[0] + t**2 * p2[0]
-        y = (1 - t)**2 * p0[1] + 2 * (1 - t) * t * p1[1] + t**2 * p2[1]
+        x = (1 - t)**2 * x0 + 2 * (1 - t) * t * x1 + t**2 * x2
+        y = (1 - t)**2 * y0 + 2 * (1 - t) * t * y1 + t**2 * y2
         pts.append((x, y))
     return pts
 
@@ -26,12 +26,14 @@ def petal(a, L, w, s):
     dx, dy = math.cos(a), math.sin(a)
     px, py = -math.sin(a), math.cos(a)
     
-    # टुपल (Tuple) वैल्यूज जो bez फ़ंक्शन में जाएंगी
-    tip = (dx * L * s, dy * L * s)
-    cl = (dx * L * 0.55 * s + px * w * s, dy * L * 0.55 * s + py * w * s)
-    cr = (dx * L * 0.55 * s - px * w * s, dy * L * 0.55 * s - py * w * s)
+    # कोआर्डिनेट्स (X, Y) को पूरी तरह अलग करके वेरिएबल्स बनाए गए
+    x0, y0 = 0, 0
+    x1, y1 = dx * L * 0.55 * s + px * w * s, dy * L * 0.55 * s + py * w * s
+    x2, y2 = dx * L * s, dy * L * s
     
-    return bez((0, 0), cl, tip) + bez(tip, cr, (0, 0))
+    x3, y3 = dx * L * 0.55 * s - px * w * s, dy * L * 0.55 * s - py * w * s
+    
+    return bez(x0, y0, x1, y1, x2, y2) + bez(x2, y2, x3, y3, x0, y0)
 
 # --- डेटा कलेक्शन ---
 segs = []
@@ -73,7 +75,7 @@ def update(f):
 
 ani = animation.FuncAnimation(fig, update, frames=FRAMES, blit=True, interval=1000/FPS)
 
-# यह बिना किसी external package के सीधे ब्राउज़र में लाइव HTML एनीमेशन प्लेयर बना देता है
+# यह बिना किसी external package के सीधे ब्राउज़र में लाइव HTML प्लेयर बना देगा
 html_js = ani.to_jshtml()
 plt.close(fig)
 
