@@ -15,21 +15,22 @@ def bez(p0, p1, p2, n=30):
     pts = []
     for i in range(n + 1):
         t = i / n
-        # बेज़ियर कर्व का सही फॉर्मूला (X और Y अलग-अलग)
+        # X और Y कोऑर्डिनेट्स के लिए बेज़ियर वक्र का सही गणितीय फॉर्मूला
         x = (1 - t)**2 * p0[0] + 2 * (1 - t) * t * p1[0] + t**2 * p2[0]
         y = (1 - t)**2 * p0[1] + 2 * (1 - t) * t * p1[1] + t**2 * p2[1]
         pts.append((x, y))
     return pts
 
 def petal(a, L, w, s):
-    d = (math.cos(a), math.sin(a))
-    p = (-math.sin(a), math.cos(a))
+    # दिशा (Direction) और लंबवत (Perpendicular) वेक्टर्स
+    dx, dy = math.cos(a), math.sin(a)
+    px, py = -math.sin(a), math.cos(a)
     
-    # टुपल मल्टीप्लिकेशन को यहाँ ठीक किया गया है (X और Y कोऑर्डिनेट्स अलग करके)
-    tip = (d[0] * L * s, d[1] * L * s)
+    # टुपल मल्टीप्लिकेशन एरर को यहाँ पूरी तरह ठीक किया गया है
+    tip = (dx * L * s, dy * L * s)
     
-    cl = (d[0] * L * 0.55 * s + p[0] * w * s, d[1] * L * 0.55 * s + p[1] * w * s)
-    cr = (d[0] * L * 0.55 * s - p[0] * w * s, d[1] * L * 0.55 * s - p[1] * w * s)
+    cl = (dx * L * 0.55 * s + px * w * s, dy * L * 0.55 * s + py * w * s)
+    cr = (dx * L * 0.55 * s - px * w * s, dy * L * 0.55 * s - py * w * s)
     
     return bez((0, 0), cl, tip) + bez(tip, cr, (0, 0))
 
@@ -69,7 +70,7 @@ def update(f):
 
 ani = animation.FuncAnimation(fig, update, frames=FRAMES, blit=True, interval=1000/FPS)
 
-# एनिमेशन को सीधे HTML प्लेयर में बदलना
+# एनिमेशन को सीधे HTML प्लेयर में रेंडर करना
 html_js = ani.to_jshtml()
 plt.close(fig)
 
