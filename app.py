@@ -15,17 +15,22 @@ def bez(p0, p1, p2, n=30):
     pts = []
     for i in range(n + 1):
         t = i / n
-        x = (1 - t)**2 * p0 + 2 * (1 - t) * t * p1 + t**2 * p2
-        y = (1 - t)**2 * p0 + 2 * (1 - t) * t * p1 + t**2 * p2
+        # बेज़ियर कर्व का सही फॉर्मूला (X और Y अलग-अलग)
+        x = (1 - t)**2 * p0[0] + 2 * (1 - t) * t * p1[0] + t**2 * p2[0]
+        y = (1 - t)**2 * p0[1] + 2 * (1 - t) * t * p1[1] + t**2 * p2[1]
         pts.append((x, y))
     return pts
 
 def petal(a, L, w, s):
     d = (math.cos(a), math.sin(a))
     p = (-math.sin(a), math.cos(a))
-    tip = (d * L * s, d * L * s)
-    cl = (d * L * 0.55 * s + p * w * s, d * L * 0.55 * s + p * w * s)
-    cr = (d * L * 0.55 * s - p * w * s, d * L * 0.55 * s - p * w * s)
+    
+    # टुपल मल्टीप्लिकेशन को यहाँ ठीक किया गया है (X और Y कोऑर्डिनेट्स अलग करके)
+    tip = (d[0] * L * s, d[1] * L * s)
+    
+    cl = (d[0] * L * 0.55 * s + p[0] * w * s, d[1] * L * 0.55 * s + p[1] * w * s)
+    cr = (d[0] * L * 0.55 * s - p[0] * w * s, d[1] * L * 0.55 * s - p[1] * w * s)
+    
     return bez((0, 0), cl, tip) + bez(tip, cr, (0, 0))
 
 segs, cols = [], []
@@ -64,9 +69,9 @@ def update(f):
 
 ani = animation.FuncAnimation(fig, update, frames=FRAMES, blit=True, interval=1000/FPS)
 
-# जादुई लाइन: यह बिना ffmpeg के एनिमेशन को सीधे HTML वेब पेज में बदल देती है
+# एनिमेशन को सीधे HTML प्लेयर में बदलना
 html_js = ani.to_jshtml()
 plt.close(fig)
 
-# वेबसाइट पर डिस्प्ले करना
-components.html(html_js, height=700)
+# स्क्रीन पर डिस्प्ले करना
+components.html(html_js, height=650)
