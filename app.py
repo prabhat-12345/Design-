@@ -4,7 +4,7 @@ import colorsys
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from matplotlib.collections import LineCollection
-import tempfile
+import streamlit.components.v1 as components
 
 st.set_page_config(page_title="Rainbow Flower", layout="centered")
 st.title("🌈 Rainbow Flower Animation")
@@ -14,7 +14,7 @@ N, L, W, R = 18, 290, 70, 22
 
 def bez(p0, p1, p2, n=30):
     pts = []
-    # यहाँ टुपल्स (x, y) को खोलकर बेज़ियर कर्व का एकदम सटीक फॉर्मूला लगाया गया है
+    # X और Y के टुपल को यहाँ पूरी तरह खोलकर फिक्स किया गया है
     for i in range(n + 1):
         t = i / n
         x = (1 - t)**2 * p0[0] + 2 * (1 - t) * t * p1[0] + t**2 * p2[0]
@@ -26,14 +26,13 @@ def petal(a, L, w, s):
     dx, dy = math.cos(a), math.sin(a)
     px, py = -math.sin(a), math.cos(a)
     
-    # कोऑर्डिनेट्स को सही टुपल फॉर्मेट (X, Y) में सेट किया गया
     tip = (dx * L * s, dy * L * s)
     cl = (dx * L * 0.55 * s + px * w * s, dy * L * 0.55 * s + py * w * s)
     cr = (dx * L * 0.55 * s - px * w * s, dy * L * 0.55 * s - py * w * s)
     
     return bez((0, 0), cl, tip) + bez(tip, cr, (0, 0))
 
-# --- डेटा इकट्ठा करना ---
+# --- डेटा कलेक्शन ---
 segs = []
 cols = []
 for k in range(N):
@@ -49,8 +48,7 @@ for k in range(N):
 total = len(segs)
 FPS = 30
 DRAW_F = FPS * 16
-HOLD_F = FPS * 2
-FRAMES = DRAW_F + HOLD_F
+FRAMES = DRAW_F + 60
 per = max(1, total // DRAW_F)
 
 # --- प्लॉटर सेटअप ---
@@ -74,22 +72,9 @@ def update(f):
 
 ani = animation.FuncAnimation(fig, update, frames=FRAMES, blit=True, interval=1000/FPS)
 
-# --- कैशिंग के साथ वीडियो जनरेट करना ---
-@st.cache_resource
-def generate_flower_video():
-    with tempfile.NamedTemporaryFile(delete=False, suffix='.mp4') as tmp:
-        v_path = tmp.name
-    writer = animation.FFMpegWriter(fps=FPS, bitrate=2500)
-    ani.save(v_path, writer=writer, dpi=120, savefig_kwargs={"facecolor": "black"})
-    plt.close(fig)
-    return v_path
+# जादुई लाइन: यह बिना ffmpeg के सीधे ब्राउज़र में ही लाइव एनीमेशन प्लेयर बना देती है
+html_js = ani.to_jshtml()
+plt.close(fig)
 
-# स्क्रीन पर लोडिंग स्पिनर और वीडियो प्लेयर
-with st.spinner("🎬 बैकएंड में एनिमेशन वीडियो जनरेट हो रही है... कृपया 30 सेकंड रुकें।"):
-    try:
-        video_file_path = generate_flower_video()
-        st.video(video_file_path, autoplay=True, loop=True, muted=True)
-        st.success("वीडियो एनिमेशन सफलतापूर्वक लोड हो गया!")
-    except Exception as err:
-        st.error(f"त्रुटि: {err}")
-        
+# स्क्रीन पर प्लेयर लोड करना
+components.html(html_js, height=650)
